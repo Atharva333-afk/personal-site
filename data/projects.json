@@ -1,0 +1,5 @@
+[
+  {"title":"A mixtape for the curious","path":"pages/projects/mixtape.html","kind":"Interactive","description":"A music collection wrapped inside a small digital world."},
+  {"title":"Writing desk","path":"pages/projects/writing.html","kind":"Words","description":"Short reflections, drafts, and pieces to revisit."},
+  {"title":"The arcade","path":"pages/projects/arcade.html","kind":"Play","description":"Small web experiments and games."}
+]
