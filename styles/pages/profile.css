@@ -1,0 +1,29 @@
+.story-lede{max-width:760px;font:clamp(1.4rem,2.8vw,2rem)/1.35 var(--serif);letter-spacing:-.02em;color:#454b40}
+.story-meta{display:flex;flex-wrap:wrap;gap:8px;margin:32px 0 42px}
+.story-meta span{padding:6px 9px;border:1px solid var(--line);font:10px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.archive-photo{margin:40px 0 64px}
+.archive-photo img{display:block;width:100%;height:auto;border:1px solid var(--line)}
+.archive-photo figcaption{max-width:760px;margin-top:10px;color:var(--muted);font:11px/1.5 var(--mono)}
+.profile-portrait{width:min(350px,100%);margin:0 0 36px}
+.profile-portrait img{display:block;width:100%;height:auto}
+.profile-portrait figcaption{margin-top:8px;color:var(--muted);font:11px var(--mono)}
+.story-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(210px,1fr);gap:clamp(30px,6vw,100px);border-top:1px solid var(--line);padding-top:34px}
+.story-section{margin-bottom:52px}
+.story-section h2{margin:0 0 13px;font:clamp(1.8rem,3vw,2.6rem)/1.08 var(--serif);font-weight:400;letter-spacing:-.045em}
+.story-section h3{margin:30px 0 8px;font:1.2rem/1.25 var(--serif);font-weight:400}
+.story-section p,.story-section li{max-width:690px;color:#50564d;line-height:1.7}
+.story-section ul{padding-left:19px}
+.story-section li+li{margin-top:10px}
+.source-box{align-self:start;border-top:2px solid var(--ink);padding-top:14px}
+.source-box h2{margin:0 0 18px;font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.source-box a{display:block;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.45;text-decoration:underline;text-decoration-color:#a0a59a;text-underline-offset:3px}
+.source-box a:hover{color:#536746}
+.source-box small{display:block;color:var(--muted);font:11px/1.4 var(--mono);margin-top:3px}
+.next-file{border-top:1px solid var(--line);padding:26px 0 12px;display:flex;justify-content:space-between;gap:25px;flex-wrap:wrap}
+.next-file a{text-decoration:underline;text-underline-offset:4px}
+.writing-card{border-top:1px solid var(--line);padding:28px 0;display:grid;grid-template-columns:145px 1fr;gap:22px}
+.writing-card h2{margin:0 0 10px;font:clamp(1.6rem,3vw,2.4rem)/1.12 var(--serif);font-weight:400;letter-spacing:-.035em}
+.writing-card p{max-width:660px;margin:0 0 13px;color:#50564d;line-height:1.65}
+.writing-card a{text-decoration:underline;text-underline-offset:4px}
+.writing-card .eyebrow{margin:5px 0 0}
+@media(max-width:760px){.story-layout{grid-template-columns:1fr}.source-box{margin-bottom:28px}.writing-card{grid-template-columns:1fr;gap:8px}.archive-photo{margin:30px 0 46px}}

@@ -6,10 +6,11 @@ A small, hand-built home for projects, writing, activities, and experiments. The
 
 ```text
 .
-├── index.html
+├── index.html         # searchable homepage
 ├── pages/
-│   ├── projects/       # project index, writing, arcade, mixtape
-│   ├── living-resume/  # resume landing page and activity archive
+│   ├── about.html      # Atharva profile and public records
+│   ├── projects/       # project index, essays, Privion, arcade, mixtape
+│   ├── living-resume/  # Descreened, DECA, BPA, and activity archive
 │   └── guestbook.html
 ├── assets/             # images, audio, icons, fonts
 ├── styles/             # shared and page styles
@@ -32,7 +33,9 @@ The guestbook currently uses browser local storage. Notes are visible only in th
 
 ## Customize
 
-- Put project thumbnails in `assets/images/projects/` and banners in `assets/images/banners/`.
+- Original DECA and Descreened photo collages live in `assets/images/banners/`; Atharva's original essays live in `assets/writing/`.
 - Keep activity entries in `data/activities.json`.
 - When separating the mixtape source, move song metadata into `data/songs.json` and interaction code into `scripts/features/mixtape.js`.
 - Add third-party attribution to `docs/credits.md`.
+
+See `docs/seo-publishing.md` before publishing or submitting the site to search engines.
