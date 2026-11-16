@@ -1,0 +1,2479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASA Apex Securities — V09 Portfolio Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #080E1A;
+    --navy2: #0D1525;
+    --navy3: #111D30;
+    --teal: #14B8A6;
+    --teal2: #0D9488;
+    --gold: #E8C84A;
+    --white: #F2F4F8;
+    --muted: #8A96AA;
+    --border: rgba(255,255,255,0.07);
+    --red: #F05C5C;
+    --green: #22C55E;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ——— SCROLL PROGRESS ——— */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 0%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--teal), var(--gold));
+    z-index: 1000;
+    transition: width 0.1s linear;
+  }
+
+  /* ——— NAV ——— */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 60px;
+    background: rgba(8,14,26,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--teal); }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--white); }
+
+  .nav-date {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ——— HERO ——— */
+  #hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 120px 60px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 60% at 80% 40%, rgba(20,184,166,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(232,200,74,0.04) 0%, transparent 60%);
+  }
+
+  .hero-grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-left {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--teal);
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(72px, 9vw, 120px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    margin-bottom: 32px;
+  }
+
+  .hero-title .line2 { color: var(--teal); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 420px;
+    margin-bottom: 56px;
+    line-height: 1.7;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    max-width: 420px;
+    margin-bottom: 48px;
+  }
+
+  .hero-stat {
+    background: var(--navy);
+    padding: 24px;
+    position: relative;
+  }
+
+  .hero-stat-num {
+    font-family: var(--font-display);
+    font-size: 42px;
+    letter-spacing: 1px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .hero-stat-num.accent { color: var(--teal); }
+  .hero-stat-num.gold { color: var(--gold); }
+
+  .hero-stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 32px;
+    background: var(--teal);
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .hero-cta:hover {
+    background: var(--white);
+    transform: translateY(-2px);
+  }
+
+  .hero-right {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+  }
+
+  .hero-chart-wrap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .hero-chart-label {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ——— SECTION BASE ——— */
+  section {
+    padding: 100px 60px;
+    position: relative;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 1px;
+    background: var(--teal);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 6vw, 80px);
+    letter-spacing: 1px;
+    line-height: 0.95;
+    margin-bottom: 60px;
+  }
+
+  /* ——— TICKER BAR ——— */
+  .ticker-bar {
+    background: var(--navy2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .ticker-inner {
+    display: inline-flex;
+    gap: 60px;
+    animation: ticker 30s linear infinite;
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ticker-item .val { color: var(--teal); }
+  .ticker-item .sep { color: var(--border); }
+
+  /* ——— TEAM ——— */
+  #team { background: var(--navy2); }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .team-card {
+    background: var(--navy);
+    padding: 48px 40px;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .team-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--teal);
+    transition: width 0.4s;
+  }
+
+  .team-card:hover::after { width: 100%; }
+  .team-card:hover { background: var(--navy3); }
+
+  .team-num {
+    font-family: var(--font-display);
+    font-size: 80px;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+    margin-bottom: -20px;
+  }
+
+  .team-name {
+    font-family: var(--font-display);
+    font-size: 32px;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .team-role {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .team-divider {
+    width: 40px;
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 24px;
+  }
+
+  .team-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .team-badge {
+    margin-top: 32px;
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+  }
+
+  /* ——— PERFORMANCE ——— */
+  #performance {
+    background: var(--navy);
+  }
+
+  .perf-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 1px;
+  }
+
+  .perf-metrics {
+    background: var(--navy2);
+    padding: 48px 40px;
+  }
+
+  .perf-metric-row {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .perf-metric-row:last-child { border-bottom: none; }
+
+  .perf-metric-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .perf-metric-name {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .perf-metric-val {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: var(--white);
+  }
+
+  .perf-metric-val.teal { color: var(--teal); }
+  .perf-metric-val.gold { color: var(--gold); }
+
+  .perf-bar-track {
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    position: relative;
+  }
+
+  .perf-bar-fill {
+    height: 100%;
+    background: var(--teal);
+    transition: width 1.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .perf-bar-fill.gold-bar { background: var(--gold); }
+
+  .perf-chart-panel {
+    background: var(--navy);
+    padding: 48px 40px;
+  }
+
+  .chart-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .chart-wrap {
+    position: relative;
+    height: 300px;
+  }
+
+  .pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 32px;
+  }
+
+  .pill {
+    padding: 6px 14px;
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .pill span { color: var(--white); }
+
+  /* ——— ALPHA DECOMP ROW ——— */
+  .alpha-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 1px;
+  }
+
+  .alpha-card {
+    background: var(--navy2);
+    padding: 32px 28px;
+    text-align: center;
+  }
+
+  .alpha-val {
+    font-family: var(--font-display);
+    font-size: 44px;
+    color: var(--teal);
+    letter-spacing: 1px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .alpha-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ——— PORTFOLIO COMPOSITION ——— */
+  #portfolio { background: var(--navy2); }
+
+  .comp-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .comp-chart-wrap {
+    height: 360px;
+    position: relative;
+  }
+
+  .alloc-list { list-style: none; }
+
+  .alloc-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .alloc-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .alloc-info { flex: 1; }
+
+  .alloc-name {
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+
+  .alloc-subs {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .alloc-pct {
+    font-family: var(--font-display);
+    font-size: 28px;
+    color: var(--white);
+  }
+
+  /* ——— STRATEGY TABS ——— */
+  #strategies { background: var(--navy); }
+
+  .tab-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+
+  .tab-btn {
+    padding: 16px 32px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+
+  .tab-btn.active {
+    color: var(--teal);
+    border-bottom-color: var(--teal);
+  }
+
+  .tab-btn:hover { color: var(--white); }
+
+  .tab-panel {
+    display: none;
+    padding: 60px 0 0;
+  }
+
+  .tab-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+
+  .strat-bullets { list-style: none; }
+
+  .strat-bullet {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    align-start: start;
+  }
+
+  .strat-bullet-key {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--teal);
+    text-transform: uppercase;
+    width: 140px;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .strat-bullet-val {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .strat-title {
+    font-family: var(--font-display);
+    font-size: 56px;
+    letter-spacing: 1px;
+    line-height: 0.9;
+    margin-bottom: 40px;
+  }
+
+  .strat-chart-side { display: flex; flex-direction: column; gap: 0; }
+
+  /* ——— COMMUNICATION ——— */
+  #communication { background: var(--navy2); }
+
+  .comm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .comm-left {
+    background: var(--navy);
+    padding: 48px 40px;
+  }
+
+  .comm-right {
+    background: var(--navy3);
+    padding: 48px 40px;
+  }
+
+  .comm-stat-big {
+    font-family: var(--font-display);
+    font-size: 96px;
+    line-height: 1;
+    color: var(--gold);
+    letter-spacing: -2px;
+    margin-bottom: 8px;
+  }
+
+  .comm-stat-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  .comm-data-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+
+  .comm-data-cell {
+    background: var(--navy2);
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .comm-data-num {
+    font-family: var(--font-display);
+    font-size: 32px;
+    color: var(--teal);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .comm-data-desc {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .comm-insight {
+    padding: 20px 24px;
+    border-left: 2px solid var(--teal);
+    background: rgba(20,184,166,0.05);
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .comm-insight strong { color: var(--white); }
+
+  /* ——— DIVIDENDS ——— */
+  #dividends { background: var(--navy); }
+
+  .div-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .div-panel {
+    background: var(--navy2);
+    padding: 40px 32px;
+  }
+
+  .div-panel-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .proj-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .proj-row:last-child { border-bottom: none; }
+
+  .proj-period {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .proj-val {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--white);
+  }
+
+  .proj-val.highlight { color: var(--gold); }
+
+  .div-stock-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .div-ticker {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: 1px;
+  }
+
+  .div-amt {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--teal);
+  }
+
+  .div-pct-bar {
+    width: 60px;
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .div-pct-fill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    background: var(--teal);
+  }
+
+  /* ——— RISK ——— */
+  #risk { background: var(--navy2); }
+
+  .risk-hero {
+    text-align: center;
+    padding: 60px;
+    border: 1px solid var(--border);
+    margin-bottom: 1px;
+    background: var(--navy);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .risk-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(20,184,166,0.05) 0%, transparent 70%);
+  }
+
+  .risk-sharpe {
+    font-family: var(--font-display);
+    font-size: 120px;
+    color: var(--teal);
+    letter-spacing: -2px;
+    line-height: 1;
+    position: relative;
+  }
+
+  .risk-sharpe-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .risk-sharpe-compare {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 12px;
+    position: relative;
+  }
+
+  .risk-sharpe-compare strong { color: var(--gold); }
+
+  .risk-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 1px;
+  }
+
+  .risk-card {
+    background: var(--navy2);
+    padding: 32px 28px;
+  }
+
+  .risk-card-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .risk-card-val {
+    font-family: var(--font-display);
+    font-size: 38px;
+    letter-spacing: 1px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .risk-card-val.good { color: var(--green); }
+  .risk-card-val.warn { color: var(--gold); }
+
+  .risk-card-note {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--teal);
+  }
+
+  .risk-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .risk-chart-panel {
+    background: var(--navy);
+    padding: 40px 32px;
+  }
+
+  /* ——— COMPETITIVE ——— */
+  #competitive { background: var(--navy); }
+
+  .comp-main-chart {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    padding: 48px 40px;
+    margin-bottom: 1px;
+  }
+
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .badge-card {
+    background: var(--navy2);
+    padding: 40px 28px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+
+  .badge-card:hover { background: var(--navy3); }
+
+  .badge-accent {
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--teal);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .badge-card:hover .badge-accent { opacity: 1; }
+
+  .badge-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    color: var(--teal);
+    line-height: 1.1;
+  }
+
+  .badge-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    line-height: 1.6;
+  }
+
+  /* ——— COMPARISON TABLE ——— */
+  .comp-table-wrap {
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-top: 1px;
+  }
+
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .comp-table th {
+    padding: 16px 24px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    background: var(--navy2);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .comp-table th:first-child { border-right: 1px solid var(--border); }
+
+  .comp-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+    background: var(--navy);
+  }
+
+  .comp-table td:first-child {
+    color: var(--muted);
+    border-right: 1px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .comp-table td.highlight {
+    color: var(--teal);
+    font-weight: 500;
+  }
+
+  .comp-table tr:last-child td { border-bottom: none; }
+
+  /* ——— HOLDINGS ——— */
+  #holdings { background: var(--navy2); }
+
+  .holdings-table-wrap {
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 60px;
+  }
+
+  .holdings-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .holdings-table th {
+    padding: 14px 20px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    background: var(--navy3);
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+  }
+
+  .holdings-table th:first-child { text-align: left; }
+
+  .holdings-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--navy2);
+    text-align: right;
+    transition: background 0.2s;
+  }
+
+  .holdings-table td:first-child {
+    text-align: left;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 1px;
+  }
+
+  .holdings-table tr:hover td { background: var(--navy3); }
+  .holdings-table tr:last-child td { border-bottom: none; background: var(--navy3); color: var(--white); }
+
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+
+  /* ——— CONCLUSION ——— */
+  #conclusion { background: var(--navy); overflow: hidden; }
+
+  .conclusion-hero {
+    text-align: center;
+    padding: 80px 60px;
+    position: relative;
+  }
+
+  .conclusion-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(20,184,166,0.04) 0%, transparent 70%);
+  }
+
+  .conclusion-quote {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 56px);
+    line-height: 1.1;
+    letter-spacing: 1px;
+    max-width: 900px;
+    margin: 0 auto 32px;
+    position: relative;
+  }
+
+  .conclusion-quote .accent { color: var(--teal); }
+
+  .conclusion-attr {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .takeaways {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 80px;
+  }
+
+  .takeaway-card {
+    background: var(--navy2);
+    padding: 40px 32px;
+  }
+
+  .takeaway-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: 1px;
+    color: var(--teal);
+    margin-bottom: 20px;
+  }
+
+  .takeaway-list {
+    list-style: none;
+  }
+
+  .takeaway-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .takeaway-list li::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    background: var(--teal);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ——— FOOTER ——— */
+  footer {
+    padding: 60px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .footer-brand {
+    font-family: var(--font-display);
+    font-size: 32px;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+
+  .footer-brand span { color: var(--teal); }
+
+  .footer-tagline {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .footer-col-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .footer-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .footer-item strong { color: var(--white); }
+
+  .footer-copy {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copy-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ——— ANIMATIONS ——— */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .fade-up-delay-1 { transition-delay: 0.1s; }
+  .fade-up-delay-2 { transition-delay: 0.2s; }
+  .fade-up-delay-3 { transition-delay: 0.3s; }
+  .fade-up-delay-4 { transition-delay: 0.4s; }
+
+  /* ——— RESPONSIVE ——— */
+  @media (max-width: 1024px) {
+    nav { padding: 16px 30px; }
+    .nav-links { display: none; }
+    section { padding: 70px 30px; }
+    #hero { grid-template-columns: 1fr; padding: 120px 30px 60px; }
+    .hero-right { display: none; }
+    .perf-layout { grid-template-columns: 1fr; }
+    .team-grid { grid-template-columns: 1fr; }
+    .comp-layout { grid-template-columns: 1fr; }
+    .div-layout { grid-template-columns: 1fr; }
+    .risk-grid { grid-template-columns: repeat(2, 1fr); }
+    .risk-charts-row { grid-template-columns: 1fr; }
+    .takeaways { grid-template-columns: 1fr; }
+    .badges-grid { grid-template-columns: repeat(2, 1fr); }
+    .alpha-row { grid-template-columns: repeat(2, 1fr); }
+    footer { grid-template-columns: 1fr; }
+    .tab-panel.active { grid-template-columns: 1fr; }
+    .comm-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav>
+  <a href="#hero" class="nav-logo">ASA <span>APEX</span></a>
+  <ul class="nav-links">
+    <li><a href="#team">Team</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#strategies">Strategy</a></li>
+    <li><a href="#risk">Risk</a></li>
+    <li><a href="#competitive">Results</a></li>
+  </ul>
+  <div class="nav-date">Dec 8, 2025 — Jan 30, 2026</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-lines"></div>
+  <div class="hero-left">
+    <div class="hero-eyebrow">V09 Financial Portfolio Management</div>
+    <h1 class="hero-title">ASA<br><span class="line2">APEX</span><br>SECURITIES</h1>
+    <p class="hero-sub">Disciplined. Data-Driven. Dominant. Institutional-grade portfolio management delivering exceptional risk-adjusted returns across 54 trading days.</p>
+    <div class="hero-stats fade-up">
+      <div class="hero-stat">
+        <div class="hero-stat-num accent" data-count="17.9" data-suffix="%">0%</div>
+        <div class="hero-stat-label">Total Returns</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num gold" data-count="1443" data-prefix="$">$0</div>
+        <div class="hero-stat-label">Dividends Earned</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num accent" data-count="14.3" data-suffix="%">0%</div>
+        <div class="hero-stat-label">Alpha Generated</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="1.45">0</div>
+        <div class="hero-stat-label">Sharpe Ratio</div>
+      </div>
+    </div>
+    <a href="#performance" class="hero-cta">View Full Analysis</a>
+  </div>
+  <div class="hero-right">
+    <div class="hero-chart-wrap">
+      <div class="hero-chart-label">Portfolio vs Benchmarks — Dec 2025 to Jan 2026</div>
+      <canvas id="heroChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <div class="ticker-inner" id="tickerInner">
+    <div class="ticker-item">Total Return <span class="val">+17.9%</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Alpha Generated <span class="val">+14.3%</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Sharpe Ratio <span class="val">1.45</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Stocks Traded <span class="val">92</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Total Trades <span class="val">198</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Trade Volume <span class="val">$1.57M</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Win Rate <span class="val">67%</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Max Drawdown <span class="val">-0.40%</span></div>
+    <div class="ticker-item sep">|</div>
+    <!-- repeat -->
+    <div class="ticker-item">Total Return <span class="val">+17.9%</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Alpha Generated <span class="val">+14.3%</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Sharpe Ratio <span class="val">1.45</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Stocks Traded <span class="val">92</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Total Trades <span class="val">198</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Trade Volume <span class="val">$1.57M</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Win Rate <span class="val">67%</span></div>
+    <div class="ticker-item sep">|</div>
+    <div class="ticker-item">Max Drawdown <span class="val">-0.40%</span></div>
+  </div>
+</div>
+
+<!-- TEAM -->
+<section id="team">
+  <div class="section-label">The Team</div>
+  <h2 class="section-title">MEET YOUR<br>ASA TEAM</h2>
+  <div class="team-grid">
+    <div class="team-card fade-up">
+      <div class="team-num">01</div>
+      <div class="team-name">Adonias Tadesse</div>
+      <div class="team-role">Lead Equity Strategist</div>
+      <div class="team-divider"></div>
+      <p class="team-desc">Led stock screening and portfolio construction, initiating core positions during high-liquidity morning sessions (8:00 AM – 12:00 PM) based on overnight news, fundamentals, and macro signals. Identified alpha-generating opportunities through systematic analysis.</p>
+      <div class="team-badge">Morning Market Specialist</div>
+    </div>
+    <div class="team-card fade-up fade-up-delay-1">
+      <div class="team-num">02</div>
+      <div class="team-name">Shlok Patel</div>
+      <div class="team-role">Portfolio Risk & Execution Strategist</div>
+      <div class="team-divider"></div>
+      <p class="team-desc">Managed intraday risk by executing midday-to-close trades (1:00 – 3:30 PM), focusing on profit-taking, exposure reduction, and volatility control in response to price action and late-session developments. Executed disciplined position sizing.</p>
+      <div class="team-badge">Risk Control Expert</div>
+    </div>
+    <div class="team-card fade-up fade-up-delay-2">
+      <div class="team-num">03</div>
+      <div class="team-name">Atharva Naveen</div>
+      <div class="team-role">Portfolio Structure & Risk Management Strategist</div>
+      <div class="team-divider"></div>
+      <p class="team-desc">Oversaw portfolio structure and risk alignment by conducting morning and evening market analysis, monitoring earnings, sector rotations, and news-driven catalysts to support balanced exposure and disciplined risk control throughout the period.</p>
+      <div class="team-badge">Strategic Oversight Lead</div>
+    </div>
+  </div>
+</section>
+
+<!-- PERFORMANCE -->
+<section id="performance">
+  <div class="section-label">Portfolio Analytics</div>
+  <h2 class="section-title">PERFORMANCE<br>DASHBOARD</h2>
+
+  <div class="perf-layout">
+    <div class="perf-metrics">
+      <div class="perf-metric-row fade-up">
+        <div class="perf-metric-top">
+          <div class="perf-metric-name">Total Return</div>
+          <div class="perf-metric-val teal" data-count="17.9" data-suffix="%">17.9%</div>
+        </div>
+        <div class="perf-bar-track"><div class="perf-bar-fill" data-width="89" style="width:0%"></div></div>
+      </div>
+      <div class="perf-metric-row fade-up fade-up-delay-1">
+        <div class="perf-metric-top">
+          <div class="perf-metric-name">Alpha Generated</div>
+          <div class="perf-metric-val teal">14.3%</div>
+        </div>
+        <div class="perf-bar-track"><div class="perf-bar-fill" data-width="95" style="width:0%"></div></div>
+      </div>
+      <div class="perf-metric-row fade-up fade-up-delay-2">
+        <div class="perf-metric-top">
+          <div class="perf-metric-name">Sharpe Ratio</div>
+          <div class="perf-metric-val gold">1.45</div>
+        </div>
+        <div class="perf-bar-track"><div class="perf-bar-fill gold-bar" data-width="97" style="width:0%"></div></div>
+      </div>
+      <div class="perf-metric-row fade-up fade-up-delay-3">
+        <div class="perf-metric-top">
+          <div class="perf-metric-name">Win Rate</div>
+          <div class="perf-metric-val teal">67%</div>
+        </div>
+        <div class="perf-bar-track"><div class="perf-bar-fill" data-width="67" style="width:0%"></div></div>
+      </div>
+      <div class="perf-metric-row fade-up">
+        <div class="perf-metric-top">
+          <div class="perf-metric-name">Max Drawdown</div>
+          <div class="perf-metric-val" style="color: var(--green)">-0.40%</div>
+        </div>
+        <div class="perf-bar-track"><div class="perf-bar-fill" style="background: var(--green)" data-width="4" style="width:0%"></div></div>
+      </div>
+      <div class="pills-row">
+        <div class="pill"><span>92</span> Stocks</div>
+        <div class="pill"><span>198</span> Trades</div>
+        <div class="pill"><span>$1.57M</span> Volume</div>
+        <div class="pill"><span>$1,443</span> Dividends</div>
+        <div class="pill"><span>$4,358</span> Comm. Value</div>
+      </div>
+    </div>
+    <div class="perf-chart-panel">
+      <div class="chart-title">Portfolio vs Benchmarks — Performance Indexed to 100</div>
+      <div class="chart-wrap">
+        <canvas id="perfChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="alpha-row">
+    <div class="alpha-card fade-up">
+      <div class="alpha-val">+6.5%</div>
+      <div class="alpha-label">Stock Selection</div>
+    </div>
+    <div class="alpha-card fade-up fade-up-delay-1">
+      <div class="alpha-val">+4.2%</div>
+      <div class="alpha-label">Market Timing</div>
+    </div>
+    <div class="alpha-card fade-up fade-up-delay-2">
+      <div class="alpha-val">+3.8%</div>
+      <div class="alpha-label">Sector Rotation</div>
+    </div>
+    <div class="alpha-card fade-up fade-up-delay-3" style="background: var(--navy3);">
+      <div class="alpha-val" style="color: var(--gold)">+17.9%</div>
+      <div class="alpha-label">Total Alpha</div>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO COMPOSITION -->
+<section id="portfolio">
+  <div class="section-label">Allocation</div>
+  <h2 class="section-title">PORTFOLIO<br>COMPOSITION</h2>
+  <div class="comp-layout">
+    <div>
+      <div class="chart-title" style="margin-bottom: 24px;">Risk-Balanced Allocation Strategy</div>
+      <div class="comp-chart-wrap">
+        <canvas id="allocChart"></canvas>
+      </div>
+    </div>
+    <div>
+      <ul class="alloc-list">
+        <li class="alloc-item fade-up">
+          <div class="alloc-dot" style="background: #3B82F6;"></div>
+          <div class="alloc-info">
+            <div class="alloc-name">Market Index Funds</div>
+            <div class="alloc-subs">QQQ · VOO · VSMGX · VSCGX</div>
+          </div>
+          <div class="alloc-pct">38%</div>
+        </li>
+        <li class="alloc-item fade-up fade-up-delay-1">
+          <div class="alloc-dot" style="background: #22C55E;"></div>
+          <div class="alloc-info">
+            <div class="alloc-name">Stability & Dividend Stocks</div>
+            <div class="alloc-subs">APD · ACI · UPS · EIX · WD</div>
+          </div>
+          <div class="alloc-pct">26%</div>
+        </li>
+        <li class="alloc-item fade-up fade-up-delay-2">
+          <div class="alloc-dot" style="background: #EF4444;"></div>
+          <div class="alloc-info">
+            <div class="alloc-name">High-Growth Positions</div>
+            <div class="alloc-subs">Biotech · Catalysts · Special Situations</div>
+          </div>
+          <div class="alloc-pct">24%</div>
+        </li>
+        <li class="alloc-item fade-up fade-up-delay-3">
+          <div class="alloc-dot" style="background: #6B7280;"></div>
+          <div class="alloc-info">
+            <div class="alloc-name">Other Holdings</div>
+            <div class="alloc-subs">Tactical positions · 600+ companies analyzed</div>
+          </div>
+          <div class="alloc-pct">12%</div>
+        </li>
+      </ul>
+      <div style="margin-top: 40px; padding: 28px; border: 1px solid var(--border); background: var(--navy);">
+        <div class="chart-title" style="margin-bottom: 20px;">Combined: 64% Portfolio Foundation</div>
+        <div style="display: flex; gap: 16px; font-family: var(--font-mono); font-size: 12px; color: var(--muted);">
+          <div style="flex:1; padding: 16px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); text-align:center;">
+            <div style="font-family: var(--font-display); font-size: 32px; color: #3B82F6; line-height:1; margin-bottom: 4px;">38%</div>
+            Market Index Funds
+          </div>
+          <div style="flex:1; padding: 16px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); text-align:center;">
+            <div style="font-family: var(--font-display); font-size: 32px; color: var(--green); line-height:1; margin-bottom: 4px;">26%</div>
+            Stability Stocks
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGIES -->
+<section id="strategies">
+  <div class="section-label">Investment Approach</div>
+  <h2 class="section-title">INVESTMENT<br>STRATEGIES</h2>
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('event')">Event-Driven</button>
+    <button class="tab-btn" onclick="switchTab('macro')">Global Macro</button>
+    <button class="tab-btn" onclick="switchTab('equity')">Long Equity</button>
+    <button class="tab-btn" onclick="switchTab('relative')">Relative Value</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-event">
+    <div>
+      <div class="strat-title">EVENT-<br>DRIVEN</div>
+      <ul class="strat-bullets">
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Special Situations</div>
+          <div class="strat-bullet-val">SPACs, restructurings, and merger-driven opportunities targeting corporate catalyst events</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Catalyst Investing</div>
+          <div class="strat-bullet-val">Biotech and small-cap names tied to regulatory or clinical events with asymmetric payoffs</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Satellite Alpha</div>
+          <div class="strat-bullet-val">Higher-volatility assets sized intentionally small to capture upside while limiting exposure</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Position Discipline</div>
+          <div class="strat-bullet-val">Largest single position maintained at approximately 4.3% — no concentrated bets</div>
+        </li>
+      </ul>
+    </div>
+    <div class="strat-chart-side">
+      <div style="background: var(--navy2); border: 1px solid var(--border); padding: 32px; margin-bottom: 1px;">
+        <div class="chart-title" style="margin-bottom: 24px;">Allocation Within Strategy</div>
+        <div style="font-family: var(--font-display); font-size: 64px; color: var(--teal); line-height: 1;">24%</div>
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase;">Of Total Portfolio</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border);">
+        <div style="background: var(--navy2); padding: 24px; text-align: center;">
+          <div style="font-family: var(--font-display); font-size: 40px; color: var(--white);">18</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Positions</div>
+        </div>
+        <div style="background: var(--navy2); padding: 24px; text-align: center;">
+          <div style="font-family: var(--font-display); font-size: 40px; color: var(--green);">72%</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Win Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-macro">
+    <div>
+      <div class="strat-title">GLOBAL<br>MACRO</div>
+      <ul class="strat-bullets">
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Macro Positioning</div>
+          <div class="strat-bullet-val">Inflation, rates, geopolitics, and energy cycles inform top-down thematic allocation decisions</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Theme Management</div>
+          <div class="strat-bullet-val">Repeated Uranium trades reflect conviction with dynamic sizing based on evolving thesis</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Systemic Risk Control</div>
+          <div class="strat-bullet-val">Broad market instruments like QQQ used to adjust market beta exposure quickly</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Sector Rotation</div>
+          <div class="strat-bullet-val">Shift toward Energy and Materials during inflationary regimes for maximum alpha capture</div>
+        </li>
+      </ul>
+    </div>
+    <div class="strat-chart-side">
+      <div style="background: var(--navy2); border: 1px solid var(--border); padding: 32px;">
+        <div class="chart-title" style="margin-bottom: 24px;">Key Themes Monitored</div>
+        <div style="display: flex; flex-direction: column; gap: 0;">
+          <div style="padding: 14px 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px; color: var(--muted);">01 — Energy Transition (Uranium, Renewables)</div>
+          <div style="padding: 14px 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px; color: var(--muted);">02 — Rate Sensitivity (Financials, REITs)</div>
+          <div style="padding: 14px 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px; color: var(--muted);">03 — Geopolitical Risk (Defense, Commodities)</div>
+          <div style="padding: 14px 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted);">04 — Inflation Hedges (Materials, Energy)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-equity">
+    <div>
+      <div class="strat-title">LONG<br>EQUITY</div>
+      <ul class="strat-bullets">
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Core Growth Engine</div>
+          <div class="strat-bullet-val">36% allocated to durable growth leaders across sectors with strong fundamental profiles</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Defensive Balance</div>
+          <div class="strat-bullet-val">Consumer Staples and Utilities provide downside protection during market dislocations</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Scale & Precision</div>
+          <div class="strat-bullet-val">~90 unique assets across 40+ industries — no single stock can materially impair performance</div>
+        </li>
+      </ul>
+    </div>
+    <div class="strat-chart-side">
+      <div style="background: var(--navy2); border: 1px solid var(--border); padding: 32px;">
+        <div class="chart-title" style="margin-bottom: 24px;">Sector Weights</div>
+        <div style="display: flex; flex-direction: column; gap: 0;">
+          <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px;">
+            <span style="color: var(--muted);">Technology</span><span style="color: var(--teal);">18%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px;">
+            <span style="color: var(--muted);">Consumer Staples</span><span style="color: var(--teal);">21%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px;">
+            <span style="color: var(--muted);">Industrials</span><span style="color: var(--teal);">19%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px;">
+            <span style="color: var(--muted);">Utilities</span><span style="color: var(--teal);">19%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 12px 0; font-family: var(--font-mono); font-size: 12px;">
+            <span style="color: var(--muted);">Financials</span><span style="color: var(--teal);">21%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-relative">
+    <div>
+      <div class="strat-title">RELATIVE<br>VALUE</div>
+      <ul class="strat-bullets">
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Execution Discipline</div>
+          <div class="strat-bullet-val">Heavy use of limit and stop orders to reduce slippage and improve average execution price</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Relative Value</div>
+          <div class="strat-bullet-val">Price-sensitive entries exploit temporary market inefficiencies for enhanced entry points</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Fund-of-Funds Proxy</div>
+          <div class="strat-bullet-val">Core capital allocated to diversified funds and broad indices for baseline exposure</div>
+        </li>
+        <li class="strat-bullet">
+          <div class="strat-bullet-key">Active Rebalancing</div>
+          <div class="strat-bullet-val">High-volume adjustment events reflect risk control and portfolio optimization, not speculation</div>
+        </li>
+      </ul>
+    </div>
+    <div class="strat-chart-side">
+      <div style="background: var(--navy2); border: 1px solid var(--border); padding: 32px;">
+        <div class="chart-title" style="margin-bottom: 24px;">Execution Quality Metrics</div>
+        <div style="display: flex; flex-direction: column; gap: 0;">
+          <div style="display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px;">
+            <span style="color: var(--muted);">Limit Orders Used</span><span style="color: var(--teal);">65%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px;">
+            <span style="color: var(--muted);">Avg Slippage</span><span style="color: var(--green);">0.12%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 14px 0; font-family: var(--font-mono); font-size: 12px;">
+            <span style="color: var(--muted);">Price Improvement Rate</span><span style="color: var(--teal);">34%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMUNICATION -->
+<section id="communication">
+  <div class="section-label">Communication Alpha</div>
+  <h2 class="section-title">THE COMMUNICATION<br>ADVANTAGE</h2>
+  <div class="comm-grid">
+    <div class="comm-left">
+      <div class="comm-stat-big" data-count="4358" data-prefix="$">$0</div>
+      <div class="comm-stat-label">Portfolio value added through active communication</div>
+      <div class="comm-data-row">
+        <div class="comm-data-cell">
+          <div class="comm-data-num">148+</div>
+          <div class="comm-data-desc">Email Exchanges</div>
+        </div>
+        <div class="comm-data-cell">
+          <div class="comm-data-num">30</div>
+          <div class="comm-data-desc">Price Fixes</div>
+        </div>
+        <div class="comm-data-cell">
+          <div class="comm-data-num">7</div>
+          <div class="comm-data-desc">Dividend Fixes</div>
+        </div>
+        <div class="comm-data-cell">
+          <div class="comm-data-num" style="color: var(--gold);">4.35%</div>
+          <div class="comm-data-desc">Additional Gain</div>
+        </div>
+      </div>
+    </div>
+    <div class="comm-right">
+      <div class="chart-title" style="margin-bottom: 32px;">Issues Resolved Through Communication</div>
+      <div style="margin-bottom: 48px;">
+        <canvas id="commChart" height="200"></canvas>
+      </div>
+      <div class="comm-insight"><strong>Market Price Discrepancies</strong> — 30 issues identified and corrected through persistent engagement with portfolio hosts, ensuring accurate pricing reflected in holdings.</div>
+      <div class="comm-insight"><strong>Dividend Calculation Errors</strong> — 7 payment corrections secured by verifying rates against published market data across ELP, EIX, ACI, and other dividend payers.</div>
+      <div class="comm-insight"><strong>Reward Adjustments</strong> — 2 additional reward adjustments received for proactively reporting discrepancies, generating measurable value beyond trading.</div>
+    </div>
+  </div>
+</section>
+
+<!-- DIVIDENDS -->
+<section id="dividends">
+  <div class="section-label">Passive Income</div>
+  <h2 class="section-title">DIVIDEND<br>STRATEGY</h2>
+  <div class="div-layout">
+    <div class="div-panel fade-up">
+      <div class="div-panel-title">Income Projections</div>
+      <div class="proj-row">
+        <div class="proj-period">Daily Average</div>
+        <div class="proj-val">$26.81</div>
+      </div>
+      <div class="proj-row">
+        <div class="proj-period">Weekly Rate</div>
+        <div class="proj-val">$187.68</div>
+      </div>
+      <div class="proj-row">
+        <div class="proj-period">Monthly Rate</div>
+        <div class="proj-val">$804.36</div>
+      </div>
+      <div class="proj-row">
+        <div class="proj-period">Annual Projection</div>
+        <div class="proj-val highlight">$9,786</div>
+      </div>
+      <div class="proj-row">
+        <div class="proj-period">Dividend Yield</div>
+        <div class="proj-val highlight">4.35%</div>
+      </div>
+      <div style="margin-top: 32px; padding: 20px; background: var(--navy); border: 1px solid var(--border);">
+        <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 12px;">Total Income Breakdown</div>
+        <div style="font-family: var(--font-display); font-size: 48px; color: var(--gold); line-height: 1;">$1,448</div>
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 8px;">$722.80 dividends + $725.05 rewards</div>
+      </div>
+    </div>
+    <div class="div-panel fade-up fade-up-delay-1">
+      <div class="div-panel-title">Cumulative Income Growth</div>
+      <div style="height: 280px; position: relative;">
+        <canvas id="divChart"></canvas>
+      </div>
+    </div>
+    <div class="div-panel fade-up fade-up-delay-2">
+      <div class="div-panel-title">Dividend Payments — 7 Total</div>
+      <div class="div-stock-row">
+        <div class="div-ticker">ELP</div>
+        <div style="flex: 1; margin: 0 16px;"><div class="div-pct-bar"><div class="div-pct-fill" style="width: 51.4%;"></div></div></div>
+        <div class="div-amt">$371.62</div>
+      </div>
+      <div class="div-stock-row">
+        <div class="div-ticker">EIX</div>
+        <div style="flex: 1; margin: 0 16px;"><div class="div-pct-bar"><div class="div-pct-fill" style="width: 18.2%;"></div></div></div>
+        <div class="div-amt">$131.62</div>
+      </div>
+      <div class="div-stock-row">
+        <div class="div-ticker">ACI</div>
+        <div style="flex: 1; margin: 0 16px;"><div class="div-pct-bar"><div class="div-pct-fill" style="width: 11.4%;"></div></div></div>
+        <div class="div-amt">$82.50</div>
+      </div>
+      <div class="div-stock-row">
+        <div class="div-ticker">APD</div>
+        <div style="flex: 1; margin: 0 16px;"><div class="div-pct-bar"><div class="div-pct-fill" style="width: 8.7%;"></div></div></div>
+        <div class="div-amt">$62.65</div>
+      </div>
+      <div class="div-stock-row">
+        <div class="div-ticker">LMNR</div>
+        <div style="flex: 1; margin: 0 16px;"><div class="div-pct-bar"><div class="div-pct-fill" style="width: 6.7%;"></div></div></div>
+        <div class="div-amt">$48.75</div>
+      </div>
+      <div class="div-stock-row">
+        <div class="div-ticker">VOO</div>
+        <div style="flex: 1; margin: 0 16px;"><div class="div-pct-bar"><div class="div-pct-fill" style="width: 2.5%;"></div></div></div>
+        <div class="div-amt">$17.71</div>
+      </div>
+      <div class="div-stock-row" style="border-bottom: none;">
+        <div class="div-ticker">QQQ</div>
+        <div style="flex: 1; margin: 0 16px;"><div class="div-pct-bar"><div class="div-pct-fill" style="width: 1.1%;"></div></div></div>
+        <div class="div-amt">$7.94</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RISK MANAGEMENT -->
+<section id="risk">
+  <div class="section-label">Risk Analytics</div>
+  <h2 class="section-title">RISK MANAGEMENT<br>& DISCIPLINE</h2>
+  
+  <div class="risk-hero fade-up">
+    <div class="risk-sharpe-label">Sharpe Ratio</div>
+    <div class="risk-sharpe">1.45</div>
+    <div class="risk-sharpe-compare">vs Market Average: 0.35 — <strong>314% better risk-adjusted returns</strong></div>
+  </div>
+
+  <div class="risk-grid">
+    <div class="risk-card fade-up">
+      <div class="risk-card-label">Max Drawdown</div>
+      <div class="risk-card-val good">-0.40%</div>
+      <div class="risk-card-note">Institutional Grade</div>
+    </div>
+    <div class="risk-card fade-up fade-up-delay-1">
+      <div class="risk-card-label">Daily Volatility</div>
+      <div class="risk-card-val warn">~0.27%</div>
+      <div class="risk-card-note">55% Below Market</div>
+    </div>
+    <div class="risk-card fade-up fade-up-delay-2">
+      <div class="risk-card-label">VaR 95%</div>
+      <div class="risk-card-val good">-0.27%</div>
+      <div class="risk-card-note">Controlled Tail Risk</div>
+    </div>
+    <div class="risk-card fade-up fade-up-delay-3">
+      <div class="risk-card-label">CVaR 95%</div>
+      <div class="risk-card-val good">-0.34%</div>
+      <div class="risk-card-note">Low Extreme Risk</div>
+    </div>
+    <div class="risk-card fade-up">
+      <div class="risk-card-label">Win Rate</div>
+      <div class="risk-card-val" style="color: var(--teal);">67%</div>
+      <div class="risk-card-note">Above Benchmark</div>
+    </div>
+    <div class="risk-card fade-up fade-up-delay-1">
+      <div class="risk-card-label">Average Win</div>
+      <div class="risk-card-val" style="color: var(--green);">$673</div>
+      <div class="risk-card-note">Per Trade</div>
+    </div>
+    <div class="risk-card fade-up fade-up-delay-2">
+      <div class="risk-card-label">Average Loss</div>
+      <div class="risk-card-val" style="color: var(--red);">$229</div>
+      <div class="risk-card-note">Well Contained</div>
+    </div>
+    <div class="risk-card fade-up fade-up-delay-3">
+      <div class="risk-card-label">Win / Loss Ratio</div>
+      <div class="risk-card-val" style="color: var(--gold);">2.94x</div>
+      <div class="risk-card-note">Elite Asymmetry</div>
+    </div>
+  </div>
+
+  <div class="risk-charts-row" style="margin-top: 1px;">
+    <div class="risk-chart-panel">
+      <div class="chart-title" style="margin-bottom: 24px;">Trade Outcome Distribution — Positive Asymmetry</div>
+      <div style="height: 220px;"><canvas id="tradeOutcomeChart"></canvas></div>
+    </div>
+    <div class="risk-chart-panel">
+      <div class="chart-title" style="margin-bottom: 24px;">Daily Volatility Comparison — Funds vs Volatile Stocks</div>
+      <div style="height: 220px;"><canvas id="volatilityChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPETITIVE -->
+<section id="competitive">
+  <div class="section-label">Competitive Position</div>
+  <h2 class="section-title">COMPETITIVE<br>POSITIONING</h2>
+  
+  <div class="comp-main-chart fade-up">
+    <div class="chart-title" style="margin-bottom: 32px;">Institutional Trading Efficiency — Frequency vs Returns (All Participants)</div>
+    <div style="height: 360px;"><canvas id="scatterChart"></canvas></div>
+  </div>
+
+  <div class="badges-grid" style="margin-bottom: 1px;">
+    <div class="badge-card fade-up">
+      <div class="badge-accent"></div>
+      <div class="badge-title">ANTI-FRAGILE PORTFOLIO</div>
+      <div class="badge-sub">High Return · Positive Skew · Resilient Alpha positioning in optimal quadrant of risk-return spectrum</div>
+    </div>
+    <div class="badge-card fade-up fade-up-delay-1">
+      <div class="badge-accent"></div>
+      <div class="badge-title">ELITE EFFICIENCY</div>
+      <div class="badge-sub">198 trades executed with 17.9% return — demonstrating maximum output per unit of activity</div>
+    </div>
+    <div class="badge-card fade-up fade-up-delay-2">
+      <div class="badge-accent"></div>
+      <div class="badge-title">1-IN-10,000 OUTLIER</div>
+      <div class="badge-sub">Statistical significance p &lt; 0.0001 — result validated as skill-driven, not attributable to chance</div>
+    </div>
+    <div class="badge-card fade-up fade-up-delay-3">
+      <div class="badge-accent"></div>
+      <div class="badge-title">THE ALPHA ARCHITECT</div>
+      <div class="badge-sub">Institutional Portfolio Grade: 94/100 — across Return, Win Rate, Sharpe, Capital Safety, and Diversification</div>
+    </div>
+  </div>
+
+  <div class="comp-table-wrap">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Your Team</th>
+          <th>Peer Average</th>
+          <th>Market Average</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Total Return</td>
+          <td class="highlight">17.9%</td>
+          <td>3.5%</td>
+          <td>2.3%</td>
+        </tr>
+        <tr>
+          <td>Sharpe Ratio</td>
+          <td class="highlight">1.45</td>
+          <td>0.68</td>
+          <td>0.35</td>
+        </tr>
+        <tr>
+          <td>Max Drawdown</td>
+          <td class="highlight">-0.40%</td>
+          <td>-2.1%</td>
+          <td>-1.5%</td>
+        </tr>
+        <tr>
+          <td>Win Rate</td>
+          <td class="highlight">67%</td>
+          <td>52%</td>
+          <td>50%</td>
+        </tr>
+        <tr>
+          <td>Total Trades</td>
+          <td class="highlight">198</td>
+          <td>45</td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td>Alpha Generated</td>
+          <td class="highlight">+14.3%</td>
+          <td>+1.2%</td>
+          <td>0.0%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- HOLDINGS -->
+<section id="holdings">
+  <div class="section-label">Core Holdings</div>
+  <h2 class="section-title">DETAILED HOLDINGS<br>ANALYSIS</h2>
+  
+  <div class="holdings-table-wrap">
+    <table class="holdings-table">
+      <thead>
+        <tr>
+          <th>Stock</th>
+          <th>Shares</th>
+          <th>Entry Price</th>
+          <th>Current Price</th>
+          <th>Price Return</th>
+          <th>Dividend</th>
+          <th>Total Return $</th>
+          <th>Total Return %</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>APD</td>
+          <td>35</td>
+          <td>$240.63</td>
+          <td>$272.50</td>
+          <td class="pos">+13.24%</td>
+          <td>$62.65</td>
+          <td class="pos">+$1,178</td>
+          <td class="pos">+13.99%</td>
+        </tr>
+        <tr>
+          <td>ACI</td>
+          <td>550</td>
+          <td>$17.40</td>
+          <td>$18.45</td>
+          <td class="pos">+6.03%</td>
+          <td>$82.50</td>
+          <td class="pos">+$660</td>
+          <td class="pos">+6.90%</td>
+        </tr>
+        <tr>
+          <td>UPS</td>
+          <td>95</td>
+          <td>$101.19</td>
+          <td>$107.80</td>
+          <td class="pos">+6.53%</td>
+          <td>$0.00</td>
+          <td class="pos">+$628</td>
+          <td class="pos">+6.53%</td>
+        </tr>
+        <tr>
+          <td>EIX</td>
+          <td>150</td>
+          <td>$60.27</td>
+          <td>$62.28</td>
+          <td class="pos">+3.33%</td>
+          <td>$131.62</td>
+          <td class="pos">+$433</td>
+          <td class="pos">+4.79%</td>
+        </tr>
+        <tr>
+          <td>WD</td>
+          <td>160</td>
+          <td>$61.47</td>
+          <td>$64.11</td>
+          <td class="pos">+4.29%</td>
+          <td>$0.00</td>
+          <td class="pos">+$422</td>
+          <td class="pos">+4.29%</td>
+        </tr>
+        <tr>
+          <td>TOTAL</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="pos">+6.55%</td>
+          <td>$276.77</td>
+          <td class="pos">+$3,322</td>
+          <td class="pos">+7.15%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CONCLUSION -->
+<section id="conclusion">
+  <div class="section-label">Final Statement</div>
+  <div class="conclusion-hero">
+    <p class="conclusion-quote">Over 54 days, we demonstrated that <span class="accent">disciplined strategy,</span> active risk management, and proactive communication can generate <span class="accent">institutional-grade returns.</span> This wasn't luck — it was process.</p>
+    <div class="conclusion-attr">— ASA Apex Securities, V09 Financial Portfolio Management Team</div>
+  </div>
+
+  <div class="takeaways">
+    <div class="takeaway-card fade-up">
+      <div class="takeaway-title">Execution Excellence</div>
+      <ul class="takeaway-list">
+        <li>198 trades executed with precision</li>
+        <li>67% win rate across all positions</li>
+        <li>Average trade size of $7,770</li>
+        <li>Disciplined position sizing maintained</li>
+      </ul>
+    </div>
+    <div class="takeaway-card fade-up fade-up-delay-1">
+      <div class="takeaway-title">Risk Management</div>
+      <ul class="takeaway-list">
+        <li>-0.40% maximum drawdown achieved</li>
+        <li>92 stocks diversified across sectors</li>
+        <li>40+ industries covered throughout</li>
+        <li>Anti-fragile portfolio positioning</li>
+      </ul>
+    </div>
+    <div class="takeaway-card fade-up fade-up-delay-2">
+      <div class="takeaway-title">Strategic Differentiation</div>
+      <ul class="takeaway-list">
+        <li>148+ email exchanges with hosts</li>
+        <li>$4,358 in value from communication</li>
+        <li>Active price monitoring and correction</li>
+        <li>Proactive engagement generated alpha</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-brand">ASA <span>APEX</span></div>
+    <div class="footer-tagline">Disciplined · Data-Driven · Dominant</div>
+  </div>
+  <div>
+    <div class="footer-col-title">Team Members</div>
+    <div class="footer-item"><span>Adonias Tadesse</span><strong>Lead Equity Strategist</strong></div>
+    <div class="footer-item"><span>Shlok Patel</span><strong>Risk & Execution</strong></div>
+    <div class="footer-item"><span>Atharva Naveen</span><strong>Structure & Risk Mgmt</strong></div>
+  </div>
+  <div>
+    <div class="footer-col-title">Analysis Period</div>
+    <div class="footer-item"><span>Start Date</span><strong>December 8, 2025</strong></div>
+    <div class="footer-item"><span>End Date</span><strong>January 30, 2026</strong></div>
+    <div class="footer-item"><span>Duration</span><strong>54 Trading Days</strong></div>
+    <div class="footer-item"><span>Presented</span><strong>February 16, 2026</strong></div>
+  </div>
+  <div class="footer-copy">
+    <div class="footer-copy-text">© 2026 ASA Apex Securities. V09 Financial Portfolio Management Team. All rights reserved.</div>
+    <div class="footer-copy-text">Past performance does not guarantee future results.</div>
+  </div>
+</footer>
+
+<script>
+// ——— SCROLL PROGRESS ———
+window.addEventListener('scroll', () => {
+  const scrollTop = document.documentElement.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const progress = (scrollTop / scrollHeight) * 100;
+  document.getElementById('progress-bar').style.width = progress + '%';
+});
+
+// ——— INTERSECTION OBSERVER ———
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      // animate bars
+      entry.target.querySelectorAll('.perf-bar-fill[data-width]').forEach(bar => {
+        bar.style.width = bar.dataset.width + '%';
+      });
+      // count up numbers
+      entry.target.querySelectorAll('[data-count]').forEach(el => {
+        animateCount(el);
+      });
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-up, section').forEach(el => observer.observe(el));
+
+function animateCount(el) {
+  const target = parseFloat(el.dataset.count);
+  const prefix = el.dataset.prefix || '';
+  const suffix = el.dataset.suffix || '';
+  const duration = 1800;
+  const start = performance.now();
+  const isInt = Number.isInteger(target);
+
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = target * eased;
+    el.textContent = prefix + (isInt ? Math.round(current).toLocaleString() : current.toFixed(1)) + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// ——— CHART.JS DEFAULTS ———
+Chart.defaults.color = '#8A96AA';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 11;
+
+// ——— HERO CHART ———
+const heroCtx = document.getElementById('heroChart').getContext('2d');
+const weeks = ['W0','W1','W2','W3','W4','W5','W6','W7','W8'];
+new Chart(heroCtx, {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: [
+      {
+        label: 'Your Portfolio',
+        data: [100, 102, 105, 110, 111, 111, 116, 118, 117.9],
+        borderColor: '#14B8A6',
+        backgroundColor: 'rgba(20,184,166,0.08)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2.5,
+        pointRadius: 3,
+        pointBackgroundColor: '#14B8A6',
+      },
+      {
+        label: 'S&P 500',
+        data: [100, 100.5, 100.2, 101, 100, 99.5, 100.5, 99, 102.3],
+        borderColor: '#3B82F6',
+        borderDash: [4, 4],
+        borderWidth: 1.5,
+        tension: 0.4,
+        pointRadius: 2,
+        fill: false,
+      },
+      {
+        label: 'Nasdaq-100',
+        data: [100, 99.5, 100, 102, 100, 98, 101, 99, 100.8],
+        borderColor: '#A78BFA',
+        borderDash: [4, 4],
+        borderWidth: 1.5,
+        tension: 0.4,
+        pointRadius: 2,
+        fill: false,
+      },
+      {
+        label: 'Peer Average',
+        data: [100, 100.8, 101, 101.5, 102, 102.5, 103, 103, 103.5],
+        borderColor: '#F59E0B',
+        borderDash: [2, 4],
+        borderWidth: 1.5,
+        tension: 0.4,
+        pointRadius: 2,
+        fill: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 20, color: '#8A96AA', font: { size: 10 } } },
+      tooltip: { mode: 'index', intersect: false }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA' } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA', callback: v => v.toFixed(0) } }
+    },
+    animation: { duration: 2000, easing: 'easeInOutQuart' }
+  }
+});
+
+// ——— PERF CHART ———
+const perfCtx = document.getElementById('perfChart').getContext('2d');
+new Chart(perfCtx, {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: [
+      {
+        label: 'Your Portfolio',
+        data: [100, 102, 105, 110, 111, 111, 116, 118, 117.9],
+        borderColor: '#14B8A6',
+        backgroundColor: 'rgba(20,184,166,0.06)',
+        fill: true, tension: 0.4, borderWidth: 2.5, pointRadius: 3, pointBackgroundColor: '#14B8A6'
+      },
+      {
+        label: 'S&P 500',
+        data: [100, 100.5, 100.2, 101, 100, 99.5, 100.5, 99, 102.3],
+        borderColor: '#3B82F6', borderDash: [4,4], borderWidth: 1.5, tension: 0.4, pointRadius: 2, fill: false
+      },
+      {
+        label: 'Peer Avg',
+        data: [100, 100.8, 101, 101.5, 102, 102.5, 103, 103, 103.5],
+        borderColor: '#F59E0B', borderDash: [2,4], borderWidth: 1.5, tension: 0.4, pointRadius: 2, fill: false
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 16, color: '#8A96AA', font: { size: 10 } } } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA' } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA', callback: v => v.toFixed(0) } }
+    }
+  }
+});
+
+// ——— ALLOC CHART ———
+const allocCtx = document.getElementById('allocChart').getContext('2d');
+new Chart(allocCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Market Index Funds', 'Stability & Dividend', 'High-Growth', 'Other'],
+    datasets: [{
+      data: [38, 26, 24, 12],
+      backgroundColor: ['#3B82F6', '#22C55E', '#EF4444', '#4B5563'],
+      borderColor: '#080E1A',
+      borderWidth: 3,
+      hoverOffset: 10
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, cutout: '65%',
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` } }
+    },
+    animation: { animateRotate: true, duration: 1500 }
+  }
+});
+
+// ——— COMM CHART ———
+const commCtx = document.getElementById('commChart').getContext('2d');
+new Chart(commCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Market Price\nDiscrepancies', 'Trade Execution\nIssues', 'Dividend\nCalc Errors', 'Reward\nAdjustments'],
+    datasets: [{
+      data: [30, 15, 7, 2],
+      backgroundColor: ['rgba(20,184,166,0.8)', 'rgba(59,130,246,0.8)', 'rgba(232,200,74,0.8)', 'rgba(167,139,250,0.8)'],
+      borderColor: ['#14B8A6', '#3B82F6', '#E8C84A', '#A78BFA'],
+      borderWidth: 1,
+      borderRadius: 2,
+    }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA' } },
+      y: { grid: { display: false }, ticks: { color: '#8A96AA', font: { size: 10 } } }
+    }
+  }
+});
+
+// ——— DIV CHART ———
+const divCtx = document.getElementById('divChart').getContext('2d');
+new Chart(divCtx, {
+  type: 'line',
+  data: {
+    labels: ['12/09','12/16','12/23','12/30','01/06','01/13','01/20','01/27','01/30'],
+    datasets: [{
+      label: 'Cumulative Income ($)',
+      data: [8, 74, 74, 269, 640, 878, 1365, 1365, 1448],
+      borderColor: '#22C55E',
+      backgroundColor: 'rgba(34,197,94,0.08)',
+      fill: true, tension: 0.3, borderWidth: 2, pointRadius: 4,
+      pointBackgroundColor: '#22C55E', pointBorderColor: '#080E1A', pointBorderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA', maxRotation: 45 } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA', callback: v => '$'+v } }
+    }
+  }
+});
+
+// ——— TRADE OUTCOME CHART ———
+const toCtx = document.getElementById('tradeOutcomeChart').getContext('2d');
+new Chart(toCtx, {
+  type: 'bar',
+  data: {
+    labels: ['$0-200', '$200-500', '$500-1k', '$1k-2k', '$2k+'],
+    datasets: [
+      {
+        label: 'Wins (Avg $673)',
+        data: [30, 12, 4, 1, 1],
+        backgroundColor: 'rgba(34,197,94,0.7)',
+        borderColor: '#22C55E',
+        borderWidth: 1, borderRadius: 2,
+      },
+      {
+        label: 'Losses (Avg $229)',
+        data: [6, 1, 0, 0, 0],
+        backgroundColor: 'rgba(240,92,92,0.7)',
+        borderColor: '#F05C5C',
+        borderWidth: 1, borderRadius: 2,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: true, labels: { boxWidth: 10, color: '#8A96AA', font: { size: 10 } } } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA' } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA' } }
+    }
+  }
+});
+
+// ——— VOLATILITY CHART ———
+const volCtx = document.getElementById('volatilityChart').getContext('2d');
+new Chart(volCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Volatile Stock Index', 'VSMGX (60/40)', 'VSCGX (40/60)'],
+    datasets: [{
+      label: 'Daily Volatility (%)',
+      data: [1.811, 0.220, 0.172],
+      backgroundColor: ['rgba(240,92,92,0.7)', 'rgba(59,130,246,0.7)', 'rgba(20,184,166,0.7)'],
+      borderColor: ['#F05C5C', '#3B82F6', '#14B8A6'],
+      borderWidth: 1, borderRadius: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#8A96AA', font: { size: 10 } } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA', callback: v => v+'%' } }
+    }
+  }
+});
+
+// ——— SCATTER CHART ———
+const scatterCtx = document.getElementById('scatterChart').getContext('2d');
+// generate realistic-looking participant data
+const participants = [];
+for (let i = 0; i < 180; i++) {
+  const trades = Math.floor(Math.random() * 100);
+  const ret = (Math.random() - 0.45) * 30;
+  participants.push({ x: trades, y: ret });
+}
+new Chart(scatterCtx, {
+  type: 'scatter',
+  data: {
+    datasets: [
+      {
+        label: 'Participants',
+        data: participants,
+        backgroundColor: 'rgba(20,184,166,0.35)',
+        borderColor: 'rgba(20,184,166,0.7)',
+        pointRadius: 4,
+      },
+      {
+        label: 'Your Team',
+        data: [{ x: 198, y: 17.9 }],
+        backgroundColor: '#E8C84A',
+        borderColor: '#E8C84A',
+        pointRadius: 14,
+        pointStyle: 'star',
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, labels: { color: '#8A96AA', font: { size: 10 }, boxWidth: 12 } },
+      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.x} trades, ${ctx.parsed.y.toFixed(1)}% return` } }
+    },
+    scales: {
+      x: { title: { display: true, text: 'Number of Trades Made', color: '#8A96AA', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA' } },
+      y: { title: { display: true, text: 'Percent Return (%)', color: '#8A96AA', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8A96AA', callback: v => v+'%' } }
+    }
+  }
+});
+
+// ——— TAB SWITCHER ———
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
