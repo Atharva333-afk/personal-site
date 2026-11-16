@@ -13,3 +13,7 @@ python3 -m http.server 4173
 Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/).
 
 The page contains its own styles, scripts, images, content, and interactive features. It does not require a build step or local asset directory.
+
+## Source media
+
+Original media discovered on the computer and confirmed to match sections of the site is preserved in [`assets/source/`](assets/source/). This includes the denim and sports collections and the Descreened project media library. These files are source material; the canonical page remains self-contained in `index.html`.
