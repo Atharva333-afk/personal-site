@@ -1,4 +1,4 @@
-# Atharva Naveen — personal website
+# Atharva Naveen  personal website
 
 The canonical personal website is the self-contained `index.html` in this repository. It is the selected shipped export of Atharva Naveen's projects and living résumé, including the interactive arcade and Connect Four route.
 
