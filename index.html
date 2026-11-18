@@ -1629,6 +1629,88 @@ body.is-sports-open .helper { display:none; }
 }
 
 </style>
+<style id="questions-video-theme">
+  body.is-questions-open .helper { display: none; }
+  body.questions-error-active .helper { display: flex; z-index: 240; }
+  body.questions-error-active .helper-message { display: block !important; }
+  body.questions-error-active .mascot-button { animation: mascot-nervous .34s steps(2,end) infinite; }
+  @keyframes mascot-nervous { 0%,100% { transform: translateX(0) rotate(0); } 50% { transform: translateX(-2px) rotate(-2deg); } }
+  .questions-video-shell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(6px, 1.5vw, 20px);
+    background: #111;
+  }
+  .questions-video-poster {
+    position: absolute;
+    inset: clamp(6px, 1.5vw, 20px);
+    z-index: 2;
+    display: block;
+    width: calc(100% - clamp(12px, 3vw, 40px));
+    height: calc(100% - clamp(12px, 3vw, 40px));
+    object-fit: contain;
+    background: #000;
+  }
+  .questions-video-play {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .questions-video-play::before {
+    content: "▶";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: grid;
+    width: 58px;
+    height: 58px;
+    place-items: center;
+    padding-left: 4px;
+    border: 2px solid rgba(255,255,255,.9);
+    border-radius: 50%;
+    background: rgba(0,0,0,.46);
+    color: #fff;
+    font: 24px/1 Arial, sans-serif;
+    transform: translate(-50%, -50%);
+  }
+  .questions-video-play:focus-visible { outline: 2px dotted #fff; outline-offset: -8px; }
+  .questions-video-shell.is-playing .questions-video-poster,
+  .questions-video-shell.is-playing .questions-video-play { display: none; }
+  .questions-video {
+    display: block;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    background: #000;
+    cursor: pointer;
+    opacity: 0;
+  }
+  .questions-video-shell.is-playing .questions-video { opacity: 1; }
+  .questions-video-shell.is-finished { background-color: #000; background-repeat: no-repeat; background-position: center; background-size: contain; }
+  .questions-video-shell.is-finished .questions-video,
+  .questions-video-shell.is-finished .questions-video-poster,
+  .questions-video-shell.is-finished .questions-video-play { display: none; }
+  .questions-error-layer { position: absolute; inset: 0; z-index: 8; overflow: hidden; pointer-events: none; }
+  .questions-error-popup { position: absolute; left: 50%; top: 50%; width: min(435px, calc(100% - 24px)); aspect-ratio: 435 / 165; transform: translate(-50%, -50%); background: #fff url("assets/media/mess-error-image2.png") center / 100% 100% no-repeat; filter: drop-shadow(4px 5px 0 rgba(0,0,0,.35)); pointer-events: auto; }
+  .questions-error-popup button { position: absolute; appearance: none; -webkit-appearance: none; padding: 0; border: 0; background: transparent; cursor: pointer; }
+  .questions-error-popup button:focus-visible { outline: 2px dotted #000; outline-offset: 2px; }
+  .questions-error-close { right: 4.5%; top: 10.5%; width: 5.5%; height: 14%; }
+  .questions-error-ok { left: 41%; bottom: 19%; width: 18%; height: 14%; }
+  @media (max-width: 700px) {
+    .questions-video-shell { margin: 0 3px; padding: 4px; }
+    .questions-video-poster { inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px); }
+    .questions-error-popup { width: calc(100% - 16px); }
+  }
+</style>
 </head>
 <body>
   <main aria-label="Opening page">
@@ -1968,14 +2050,15 @@ body.is-sports-open .helper { display:none; }
   <section class="questions-page" id="questions-page" aria-labelledby="questions-page-title" hidden>
     <div class="questions-window">
       <header class="questions-titlebar"><span class="questions-title-icon" aria-hidden="true"></span><strong id="questions-page-title">big_questions.txt - Paint</strong><button class="site-find-button site-window-find" type="button" data-site-find aria-haspopup="dialog">Find</button><button type="button" class="questions-close" data-questions-home aria-label="Close Big Questions and return home">×</button></header>
-      
-      <div class="questions-canvas" id="questions-canvas"><div class="questions-prompt"><p class="questions-copy" id="questions-copy">Does fate control us, or do we control our own destiny?</p><output class="questions-answer" id="questions-answer" for="questions-slider" aria-live="polite">FATE 50% / CHOICE 50%</output></div></div>
-      <div class="questions-control">
-        <label class="questions-label" for="questions-slider">Where do you land?</label>
-        <input class="questions-slider" id="questions-slider" type="range" min="0" max="100" step="1" value="50" aria-valuetext="50 percent fate, 50 percent choice">
-        <div class="questions-endpoints" aria-hidden="true"><span>Fate</span><span>Choice</span></div>
+
+      <div class="questions-canvas questions-video-shell" id="questions-canvas">
+        <img class="questions-video-poster" id="questions-video-poster" src="assets/media/big-questions-poster.png" alt="Big Q's with Atharva">
+        <button class="questions-video-play" id="questions-video-play" type="button" aria-label="Play Big Questions with Atharva"></button>
+      <video class="questions-video" id="questions-video" preload="none" playsinline poster="assets/media/big-questions-poster.png" aria-label="Big Questions with Atharva">
+          <source src="assets/media/big-questions.mp4" type="video/mp4">
+        </video>
+        <div class="questions-error-layer" id="questions-error-layer" aria-live="polite" aria-label="Video error messages"></div>
       </div>
-      <footer class="questions-status">Big Questions / your answer stays in this browser</footer>
     </div>
   </section>
   <section class="music-page" id="music-page" aria-labelledby="music-title" hidden>
@@ -3941,29 +4024,99 @@ body.is-sports-open .helper { display:none; }
     restoreGamesRoute();
 
     const questionsPage = document.getElementById('questions-page');
-    const questionsCanvas = document.getElementById('questions-canvas');
-    const questionsCopy = document.getElementById('questions-copy');
-    const questionsSlider = document.getElementById('questions-slider');
+    const questionsVideoShell = document.getElementById('questions-canvas');
+    const questionsVideoPlay = document.getElementById('questions-video-play');
+    const questionsVideo = document.getElementById('questions-video');
+    const questionsErrorLayer = document.getElementById('questions-error-layer');
+    const questionsMascot = document.getElementById('mascot-button');
+    const questionsMascotMessage = document.getElementById('helper-message');
     const questionsTriggers = [...document.querySelectorAll('[data-questions]')];
-    const questionsAnswer = document.getElementById('questions-answer');
     let lastQuestionsTrigger = questionsTriggers[0];
-    const questionStorageKey = 'atharva-big-question-fate-choice';
-    const renderQuestionAnswer = value => {
-      const choice = Math.max(0,Math.min(100,Math.round(Number(value)||0)));
-      questionsSlider.value = String(choice);
-      questionsAnswer.textContent = `FATE ${100-choice}% / CHOICE ${choice}%`;
-      questionsSlider.setAttribute('aria-valuetext',`${100-choice} percent fate, ${choice} percent choice`);
-      try { localStorage.setItem(questionStorageKey,String(choice)); } catch (_) {}
+    let questionsErrorCount = 0;
+    const startQuestionsVideo=()=>questionsVideo.play().catch(()=>{});
+    const updateQuestionsErrorMood=()=>{
+      const count=questionsErrorLayer.children.length;
+      questionsErrorCount=count;
+      questionsErrorLayer.setAttribute('aria-label',`${count} video error ${count===1?'message':'messages'}`);
+      if(count<=2)questionsMascotMessage.textContent='HEY — YOU HAVE AN ERROR. YOU SHOULD CLOSE IT.';
+      else if(count<=8)questionsMascotMessage.textContent='Uh… there are more errors now. Maybe stop clicking?';
+      else if(count<=20)questionsMascotMessage.textContent='Okay, this is getting stressful. Please close them!';
+      else questionsMascotMessage.textContent='I AM VERY NERVOUS. PLEASE STOP MAKING ERRORS.';
+      questionsMascot.setAttribute('aria-label',count<=2?'Warn about the video error':`Nervous mascot with ${count} errors`);
     };
+    const createQuestionsError=()=>{
+      const popup=document.createElement('article');
+      popup.className='questions-error-popup';
+      popup.setAttribute('aria-label','Dwwin.exe - DLL Initialization Failed');
+      popup.style.left=`${20+Math.random()*60}%`;
+      popup.style.top=`${18+Math.random()*64}%`;
+      const close=document.createElement('button');
+      close.className='questions-error-close';
+      close.type='button';
+      close.setAttribute('aria-label','Close error');
+      close.addEventListener('click',()=>{
+        popup.remove();
+        for(let index=0;index<4;index++)createQuestionsError();
+        updateQuestionsErrorMood();
+      });
+      const ok=document.createElement('button');
+      ok.className='questions-error-ok';
+      ok.type='button';
+      ok.setAttribute('aria-label','OK');
+      ok.addEventListener('click',()=>{
+        for(let index=0;index<2;index++)createQuestionsError();
+        updateQuestionsErrorMood();
+      });
+      popup.append(close,ok);
+      questionsErrorLayer.append(popup);
+    };
+    const spawnQuestionsErrors=count=>{
+      for(let index=0;index<count;index++)createQuestionsError();
+      updateQuestionsErrorMood();
+    };
+    const finishQuestionsVideo=()=>{
+      try{
+        const canvas=document.createElement('canvas');
+        canvas.width=questionsVideo.videoWidth||1280;
+        canvas.height=questionsVideo.videoHeight||720;
+        canvas.getContext('2d').drawImage(questionsVideo,0,0,canvas.width,canvas.height);
+        questionsVideoShell.style.backgroundImage=`url("${canvas.toDataURL('image/png')}")`;
+      }catch(_){
+        questionsVideoShell.style.backgroundImage='url("assets/media/big-questions-poster.png")';
+      }
+      questionsVideoShell.classList.add('is-finished');
+      document.body.classList.add('questions-error-active');
+      questionsMascotMessage.textContent='HEY — YOU HAVE AN ERROR. YOU SHOULD CLOSE IT.';
+      spawnQuestionsErrors(2);
+    };
+    questionsVideoPlay.addEventListener('click',startQuestionsVideo);
+    questionsVideo.addEventListener('play',()=>questionsVideoShell.classList.add('is-playing'));
+    questionsVideo.addEventListener('ended',finishQuestionsVideo);
+    questionsVideo.addEventListener('click',event=>{
+      const controlsBand=Math.min(68,questionsVideo.clientHeight*.2);
+      if(event.offsetY>questionsVideo.clientHeight-controlsBand)return;
+      if(questionsVideo.paused)startQuestionsVideo();
+    });
     const setQuestionsOpen=(open,{focus=true}={})=>{
       questionsPage.hidden=!open;
       document.body.classList.toggle('is-questions-open',open);
       questionsTriggers.forEach(button=>button.setAttribute('aria-expanded',String(open)));
-      if(focus)(open?questionsSlider:lastQuestionsTrigger)?.focus({preventScroll:true});
+      if(!open){
+        questionsVideo.pause();
+        questionsVideo.currentTime=0;
+        questionsVideo.load();
+        questionsVideoShell.classList.remove('is-playing','is-finished');
+        questionsVideoShell.style.backgroundImage='';
+        questionsErrorLayer.replaceChildren();
+        document.body.classList.remove('questions-error-active');
+        questionsErrorCount=0;
+      }
+      if(focus)(open?questionsVideo:lastQuestionsTrigger)?.focus({preventScroll:true});
     };
     const openQuestions=trigger=>{
       lastQuestionsTrigger=trigger;
       setQuestionsOpen(true);
+      startQuestionsVideo();
       if(!window.location.hash.startsWith('#questions')){
         try{history.pushState({page:'questions'},'','#questions');}
         catch(_){window.location.hash='questions';}
@@ -3978,14 +4131,10 @@ body.is-sports-open .helper { display:none; }
     };
     questionsTriggers.forEach(button=>button.addEventListener('click',()=>openQuestions(button)));
     questionsPage.querySelector('[data-questions-home]').addEventListener('click',closeQuestions);
-    questionsSlider.addEventListener('input',()=>renderQuestionAnswer(questionsSlider.value));
     document.addEventListener('keydown',event=>{if(!questionsPage.hidden&&event.key==='Escape')closeQuestions();});
     const restoreQuestionsRoute=()=>setQuestionsOpen(window.location.hash==='#questions',{focus:false});
     window.addEventListener('popstate',restoreQuestionsRoute);
     window.addEventListener('hashchange',restoreQuestionsRoute);
-    let savedQuestion = 50;
-    try { savedQuestion = localStorage.getItem(questionStorageKey) ?? 50; } catch (_) {}
-    renderQuestionAnswer(savedQuestion);
     restoreQuestionsRoute();
     const musicPage=document.getElementById('music-page');
     const musicTriggers=[...document.querySelectorAll('[data-music]')];
@@ -4321,7 +4470,6 @@ body.is-sports-open .helper { display:none; }
     let audioContext=null;
     let audioMaster=null;
     let ambientStarted=false;
-    let sliderLastTick=-Infinity;
     let lastClickSound=-Infinity;
     let lastInteraction=0;
     const updateSoundControls=()=>{
@@ -4422,21 +4570,6 @@ body.is-sports-open .helper { display:none; }
       else if(target.matches('[data-jeans-home],[data-sports-home],[data-writing-home],[data-portfolio-home],[data-paint-home],[data-games-home],[data-questions-home],[data-guestbook-home],[data-music-home]'))playUiSound('close');
       else if(target.matches('.jean-select,.sports-item,.game-cartridge,.portfolio-filter,.writing-card'))playUiSound('select');
       else playUiSound('tap');
-    });
-    const soundSlider=document.getElementById('questions-slider');
-    soundSlider.addEventListener('input',()=>{
-      const now=performance.now();
-      if(now-sliderLastTick<135)return;
-      sliderLastTick=now;
-      playUiSound('tick');
-    });
-    document.addEventListener('keydown',event=>{
-      if(event.repeat||!soundEnabled||document.getElementById('questions-page').hidden)return;
-      if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;
-      const now=performance.now();
-      if(now-sliderLastTick<135)return;
-      sliderLastTick=now;
-      playUiSound('tick');
     });
     updateSoundControls();
     const mascotButton=document.getElementById('mascot-button');
@@ -4613,14 +4746,6 @@ body.is-sports-open .helper { display:none; }
       const now=performance.now();
       if(now-lastGuestbookTap<=380){lastGuestbookTap=0;stampGuestbookHeart();}
       else lastGuestbookTap=now;
-    });
-    const questionEdges=[];
-    questionsSlider.addEventListener('change',()=>{
-      const value=Number(questionsSlider.value),last=Number(questionsSlider.max);
-      if(value!==0&&value!==last){questionEdges.length=0;return;}
-      if(questionEdges.at(-1)!==value)questionEdges.push(value);
-      while(questionEdges.length>3)questionEdges.shift();
-      if(questionEdges.join(',')===`${last},0,${last}`){questionEdges.length=0;revealSecret('questions');}
     });
     // Cross-section navigation and search. Uses the existing project and essay records.
     const sectionPages = {jeans:jeansPage,sports:sportsPage,writing:writingPage,portfolio:portfolioPage,paint:paintPage,games:gamesPage,questions:questionsPage,music:musicPage,guestbook:guestbookPage};
