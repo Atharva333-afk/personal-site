@@ -170,7 +170,8 @@
           if(activeMission.data.title==='GARAGE SALE'&&!player.inVehicle){ say('Marty wants a car in Ghost Park. Find one first.'); }
           else { activeMission.stage=3; activeMission.objective='Lose the heat, then return to '+landmarkById[activeMission.data.start].name+'.'; player.heat=Math.max(player.heat,1.7); sound('mission'); say('Package secured. The city noticed.'); }
         } else if(activeMission&&activeMission.stage===3&&l?.id===activeMission.data.start){
-          const reward=activeMission.data.reward; player.cash+=reward; player.respect+=1; missionIndex++; safeStore('cash',player.cash); safeStore('respect',player.respect); safeStore('missionIndex',missionIndex); activeMission=null; player.heat=Math.max(0,player.heat-.8); sound('success'); say('JOB COMPLETE · +$'+reward+' · respect up',3.2);
+          if(player.heat>.25){ say('Lose the heat first. The safehouse is not a magic shield.'); }
+          else { const reward=activeMission.data.reward; player.cash+=reward; player.respect+=1; missionIndex++; safeStore('cash',player.cash); safeStore('respect',player.respect); safeStore('missionIndex',missionIndex); activeMission=null; player.heat=0; sound('success'); say('JOB COMPLETE · +$'+reward+' · respect up',3.2); }
         } else if(l){ say(l.name+' · no business here yet.'); }
         updateHud();
       };
