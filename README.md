@@ -1,6 +1,9 @@
 
 # Atharva Naveen's Personal Website
 
+<p align="center">
+  <img src="assets/source/jerseys-cool/8.png" width="820" alt="A selection from Atharva's sports jersey archive">
+</p>
 I mean, it was always supposed to be a chill website. Nothing too serious, just a place where I could put whatever I wanted and keep changing things around.
 
 I've always tried to make sure that every time I commit changes, there's some cool new feature or something different that y'all (I'm Texan) get to see. Sometimes it's a whole new section, sometimes it's just a small detail that probably nobody would notice, but I still wanted to add it.
