@@ -4841,5 +4841,9 @@ body.is-sports-open .helper { display:none; }
     new MutationObserver(()=>{const index=portfolioProjects.findIndex(p=>p.id===activePortfolioProject);neighbors.children[0].disabled=index<=0;neighbors.children[1].disabled=index>=portfolioProjects.length-1;}).observe(portfolioField('title'),{childList:true});
     refreshUiRoute();
   </script>
+  <script type="module">
+    import { inject } from 'https://cdn.jsdelivr.net/npm/@vercel/analytics@1/+esm';
+    inject();
+  </script>
 </body>
 </html>
