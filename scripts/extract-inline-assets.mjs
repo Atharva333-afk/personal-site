@@ -23,7 +23,7 @@ await Promise.all([
 ]);
 
 let html = await readFile(sourcePath, 'utf8');
-const dataUrlPattern = /data:([a-zA-Z0-9.+-]+\/[a-zA-Z0-9.+-]+)(;base64)?,([^"')\s<>]+)/g;
+const dataUrlPattern = /data:([a-zA-Z0-9.+-]+\/[a-zA-Z0-9.+-]+)(;base64)?,([^"')\s<>$]+)/g;
 const pending = [];
 
 html = html.replace(dataUrlPattern, (whole, mime, base64Flag, payload) => {
