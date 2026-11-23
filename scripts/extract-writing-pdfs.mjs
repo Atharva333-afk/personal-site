@@ -22,8 +22,8 @@ source = source.replace(pdfPattern, (whole, encoded, downloadName) => {
 });
 
 source = source.replace(
-  /original\.href = `assets\/generated\/21db39c9da168bbc6810\.pdf\s+original\.download = essay\.filename;/,
-  'original.href = essay.pdf;\n      original.download = essay.filename;'
+  'original.href = `data:application/pdf;base64,${essay.pdf}`;',
+  'original.href = essay.pdf;'
 );
 
 await Promise.all(writes);
