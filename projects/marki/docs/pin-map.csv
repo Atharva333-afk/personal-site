@@ -1,6 +1,0 @@
-signal,firmware_pin,connected_to,confidence,status,notes
-LED,GPIO18,LED through a series resistor,firmware assignment,recheck after rewiring,"Use a 220 to 330 ohm resistor in series."
-Buzzer,GPIO19,Buzzer,firmware assignment,check electrical requirements,"Only use a direct GPIO connection when the buzzer is compatible."
-OLED SDA,GPIO21,OLED SDA,planned mapping,not in current test sketch,"Confirm the actual OLED controller and voltage before connecting."
-OLED SCL,GPIO22,OLED SCL,planned mapping,not in current test sketch,"Confirm the actual OLED controller and voltage before connecting."
-Access point,Wi-Fi,Marki local network,firmware assignment,change placeholder password,"Open http://192.168.4.1 after joining the access point."
