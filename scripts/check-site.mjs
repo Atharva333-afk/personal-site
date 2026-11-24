@@ -24,3 +24,7 @@ for (const image of html.match(/<img\b[^>]*>/g) ?? []) {
 
 execFileSync(process.execPath, ['--check', 'assets/js/site.js']);
 console.log(`Site checks passed: ${ids.length} IDs, ${assetReferences.length} asset references, JavaScript syntax.`);
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)

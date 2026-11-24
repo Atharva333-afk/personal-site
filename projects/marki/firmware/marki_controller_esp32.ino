@@ -71,3 +71,7 @@ void setup() {
 void loop() {
   server.handleClient();
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)

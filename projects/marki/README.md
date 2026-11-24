@@ -69,3 +69,7 @@ the first job here is still to test safely, not pretend the breadboard is alread
 **active build.**
 
 Marki is not trying to hide the messy middle. the failed uploads, rewires, tests, screenshots, and tiny wins are part of the project too. more updates when it gets less breadboard and more desk computer.
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)

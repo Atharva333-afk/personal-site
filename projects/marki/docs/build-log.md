@@ -9,3 +9,7 @@ these are the three Lapse entries that catch this part of the Marki build actual
 | 3 | jumped between firmware edits and hardware debugging because both had weird little problems | [debugging session](https://lapse.hackclub.com/timelapse/crfJcFE4N9NL) |
 
 the titles are a little chaotic because the build was a little chaotic. honestly that is kind of the point of keeping the log.
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)

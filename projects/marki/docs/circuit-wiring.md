@@ -29,3 +29,7 @@ an early build log calls the LED and buzzer connections D5 and D6. do not use th
 8. leave the OLED and two-board communication until the single-board test is stable.
 
 the photos are useful for seeing the project develop. they are not enough to prove an exact pin assignment, a safe voltage level, or that a breadboard rail is doing what it looks like it is doing.
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)

@@ -4,3 +4,7 @@ Buzzer,GPIO19,Buzzer,firmware assignment,check electrical requirements,"Only use
 OLED SDA,GPIO21,OLED SDA,planned mapping,not in current test sketch,"Confirm the actual OLED controller and voltage before connecting."
 OLED SCL,GPIO22,OLED SCL,planned mapping,not in current test sketch,"Confirm the actual OLED controller and voltage before connecting."
 Access point,Wi-Fi,Marki local network,firmware assignment,change placeholder password,"Open http://192.168.4.1 after joining the access point."
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)

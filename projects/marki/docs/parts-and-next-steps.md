@@ -31,3 +31,7 @@ the four-digit display route was possible, but it would have meant more wiring a
 7. think about mounting or an enclosure once the electronics stop moving around so much.
 
 the unknowns are not a problem. they are basically the to-do list that keeps the project moving.
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)

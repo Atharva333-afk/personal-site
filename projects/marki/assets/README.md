@@ -20,3 +20,7 @@ this is the visual side of the build. i kept the original photos and Arduino scr
 - [board and OLED photo](reference/marki-board-and-oled.jpg)
 
 some pictures show an earlier stage. that is intentional. they are here to show the actual route the project took, not to claim every old wire is the final wiring.
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)

@@ -18,3 +18,7 @@ that is real evidence that the ESP32 sketch compiled and flashed successfully.
 - the full build stays stable after more than one quick test
 
 so yeah, the successful flash is a win. it is just not the same thing as saying every future feature is done forever.
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)

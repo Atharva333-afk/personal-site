@@ -10,3 +10,7 @@ the important rule for this folder is simple: if a pin or part was not actually 
 - [verification](verification.md): what the successful ESP32 upload proves and what it does not.
 - [build log](build-log.md): the three Lapse entries from the LED, buzzer, and debugging work.
 - [build report](build-report/README.md): the full PDF and DOCX archive.
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)

@@ -33,3 +33,7 @@ it is intentionally not trying to do every future Marki idea at once. it starts 
 ## code cleanup note
 
 the published sketch keeps the real route behavior and pin choices, but removes narrating comments, the accidental personal serial message, and the working access-point password. the small `redirectHome` helper is there because all three controls do the same redirect. nothing here is trying to be a huge framework for a three-button page.
+<<<<<<< HEAD
+=======
+
+>>>>>>> c0bd258 (Sync website archive and Marki documentation)
